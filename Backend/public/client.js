@@ -18,7 +18,7 @@ if(navigator.geolocation) {
 
 const map = L.map("map").setView([0, 0], 16); // Initialize the map with a default view
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{
-    attribution: 'SCRIPT-X',
+    attribution: 'prabes-dev',
 }).addTo(map); // Add OpenStreetMap tiles to the map
 
 
