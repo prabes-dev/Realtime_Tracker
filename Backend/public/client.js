@@ -11,9 +11,23 @@ const directions = new MapboxDirections({
   unit: 'metric',
   profile: 'mapbox/driving',
 });
-map.addControl(directions, 'top-left');
-map.addControl(new maplibregl.NavigationControl(), "top-right");
 
+let directionsVisible = true; // initial state
+const directionBtn = document.getElementById('direction-btn');
+
+// assume 'directions' is an instance of MapboxDirections
+directionBtn.addEventListener('click', () => {
+  if (directionsVisible) {
+    map.removeControl(directions); // hide panel
+  } else {
+    map.addControl(directions, 'top-left'); // show panel
+  }
+  directionsVisible = !directionsVisible; // toggle state
+});
+
+map.addControl(directions, 'top-left');
+
+map.addControl(new maplibregl.NavigationControl(), "top-right");
 
 
 // Store user marker and latest position
