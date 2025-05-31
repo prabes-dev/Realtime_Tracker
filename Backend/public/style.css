@@ -1,16 +1,29 @@
-*{
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-html,body{
-    font-family: 'Poppins', sans-serif;
-    background-color: #f0f0f0;
-    height: 100%;
-    width: 100%;
+html,
+body {
+  height: 100%;
+  font-family: "Poppins", sans-serif;
+  background-color: #f0f0f0;
 }
-#map{
-    height: 100%;
-    width: 100%;
+
+.main {
+  height: 100%;
+  display: flex;
+  width: 100%;
+}
+
+#map {
+  width: 100vw;
+  height: 100vh;
+}
+#locate-btn {
+  position: absolute;
+  bottom: 50px;
+  right: 20px;
+  z-index: 1;
 }
