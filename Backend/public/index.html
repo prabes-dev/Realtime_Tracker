@@ -8,63 +8,9 @@
       href="https://unpkg.com/maplibre-gl/dist/maplibre-gl.css"
       rel="stylesheet"
     />
+    <link rel="stylesheet" href="./style.css">
     <title>OpenMap</title>
-    <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-
-      html,
-      body {
-        height: 100%;
-        font-family: "Poppins", sans-serif;
-        background-color: #f0f0f0;
-      }
-
-      .main {
-        height: 100%;
-        display: flex;
-        width: 100%;
-      }
-
-      #map {
-        width: 100%;
-        height: 100%;
-      }
-
-      #locate-btn {
-        position: absolute;
-        bottom: 7%;
-        right: 2%;
-        z-index: 1;
-        padding: 12px 16px;
-        background: #007cba;
-        color: white;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        font-size: 16px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-        transition: all 0.2s ease;
-      }
-
-      #locate-btn:hover {
-        background: #005a87;
-        transform: translateY(-1px);
-      }
-
-      #locate-btn:disabled {
-        background: #ccc;
-        cursor: not-allowed;
-        transform: none;
-      }
-
-      .loading {
-        opacity: 0.7;
-      }
-    </style>
+   
   </head>
   <body>
     <div class="main">
@@ -138,94 +84,6 @@
       </svg>
     </button>
 
-    <script>
-      // Initialize map
-      const map = new maplibregl.Map({
-        style: "https://tiles.openfreemap.org/styles/liberty",
-        center: [13.388, 52.517],
-        zoom: 9.5,
-        container: "map",
-      });
-      map.addControl(new maplibregl.NavigationControl(), "top-right");
-
-      // Store user location
-      let userLocation = null;
-      let userMarker = null;
-      const locateBtn = document.getElementById("locate-btn");
-
-      // Get user location immediately on page load
-      function getUserLocation() {
-        if ("geolocation" in navigator) {
-          navigator.geolocation.getCurrentPosition(
-            (position) => {
-              const { latitude, longitude } = position.coords;
-
-              // Store the location
-              userLocation = { lat: latitude, lng: longitude };
-
-              // Update button to ready state
-              locateBtn.disabled = false;
-              locateBtn.classList.remove("loading");
-
-              console.log("Location obtained:", userLocation);
-            },
-            (error) => {
-              console.error("Location error:", error);
-
-              // Update button to show error state
-              locateBtn.textContent = "📍 Location Unavailable";
-              locateBtn.disabled = true;
-
-              // Optional: Show user-friendly message
-              setTimeout(() => {
-                locateBtn.textContent = "📍 My Location";
-                locateBtn.disabled = false;
-              }, 3000);
-            },
-            {
-              enableHighAccuracy: true,
-              timeout: 10000,
-              maximumAge: 300000, // Cache location for 5 minutes
-            }
-          );
-        } else {
-          locateBtn.textContent = "📍 Not Supported";
-          locateBtn.disabled = true;
-        }
-      }
-
-      // Handle locate button click
-      locateBtn.addEventListener("click", () => {
-        if (userLocation) {
-          // Instantly fly to stored location
-          const { lat, lng } = userLocation;
-
-          // Add or update the marker
-          if (userMarker) {
-            userMarker.setLngLat([lng, lat]);
-          } else {
-            userMarker = new maplibregl.Marker({
-              color: "#007cba",
-            })
-              .setLngLat([lng, lat])
-              .addTo(map);
-          }
-
-          map.flyTo({
-            center: [lng, lat],
-            zoom: 15,
-            essential: true,
-          });
-        } else {
-          // Fallback: try to get location again
-          locateBtn.textContent = "📍 Getting Location...";
-          locateBtn.disabled = true;
-          getUserLocation();
-        }
-      });
-
-      // Get location on page load
-      getUserLocation();
-    </script>
+    <script src="./client.js"></script>
   </body>
 </html>
