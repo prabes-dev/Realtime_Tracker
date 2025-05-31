@@ -1,87 +1,76 @@
-      // Initialize map
-      const map = new maplibregl.Map({
-        style: "https://tiles.openfreemap.org/styles/liberty",
-        center: [13.388, 52.517],
-        zoom: 9.5,
-        container: "map",
-      });
-      map.addControl(new maplibregl.NavigationControl(), "top-right");
+const map = new maplibregl.Map({
+  style: "https://tiles.openfreemap.org/styles/liberty",
+  center: [13.388, 52.517],
+  zoom: 9.5,
+  container: "map",
+});
 
-      // Store user location
-      let userLocation = null;
-      let userMarker = null;
-      const locateBtn = document.getElementById("locate-btn");
+//adds direction plugin
+const directions = new MapboxDirections({
+ accessToken: 'pk.eyJ1IjoiZXN0aGVyY2F0ZXYiLCJhIjoiY2wyN2w3M256MDBqYjN0bW1uOG16ZzVqdiJ9.apozKCwK2RIwWPweckfjSg',
+  unit: 'metric',
+  profile: 'mapbox/driving',
+});
+map.addControl(directions, 'top-left');
+map.addControl(new maplibregl.NavigationControl(), "top-right");
 
-      // Get user location immediately on page load
-      function getUserLocation() {
-        if ("geolocation" in navigator) {
-          navigator.geolocation.getCurrentPosition(
-            (position) => {
-              const { latitude, longitude } = position.coords;
 
-              // Store the location
-              userLocation = { lat: latitude, lng: longitude };
 
-              // Update button to ready state
-              locateBtn.disabled = false;
-              locateBtn.classList.remove("loading");
+// Store user marker and latest position
+let userMarker = null;
+let latestCoords = null;
+const locateBtn = document.getElementById("locate-btn");
 
-              console.log("Location obtained:", userLocation);
-            },
-            (error) => {
-              console.error("Location error:", error);
+// Start watching location
+function startTrackingLocation() {
+  if ("geolocation" in navigator) {
+    navigator.geolocation.watchPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
 
-              // Update button to show error state
-              locateBtn.textContent = "📍 Location Unavailable";
-              locateBtn.disabled = true;
+        // Update latest coordinates
+        latestCoords = [longitude, latitude];
 
-              // Optional: Show user-friendly message
-              setTimeout(() => {
-                locateBtn.textContent = "📍 My Location";
-                locateBtn.disabled = false;
-              }, 3000);
-            },
-            {
-              enableHighAccuracy: true,
-              timeout: 10000,
-              maximumAge: 300000, // Cache location for 5 minutes
-            }
-          );
+        // Update or add marker on map
+        if (userMarker) {
+          userMarker.setLngLat(latestCoords);
         } else {
-          locateBtn.textContent = "📍 Not Supported";
-          locateBtn.disabled = true;
+          userMarker = new maplibregl.Marker({ color: "#007cba" })
+            .setLngLat(latestCoords)
+            .addTo(map);
         }
+
+        locateBtn.disabled = false;
+        locateBtn.classList.remove("loading");
+      },
+      (error) => {
+        console.error("Location error:", error);
+        locateBtn.disabled = true;
+        setTimeout(() => {
+          locateBtn.disabled = false;
+        }, 3000);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0, // Always get fresh data
       }
+    );
+  } else {
+    locateBtn.disabled = true;
+  }
+}
 
-      // Handle locate button click
-      locateBtn.addEventListener("click", () => {
-        if (userLocation) {
-          // Instantly fly to stored location
-          const { lat, lng } = userLocation;
+// Fly to current location on button click
+locateBtn.addEventListener("click", () => {
+  if (latestCoords) {
+    map.flyTo({
+      center: latestCoords,
+      zoom: 15,
+      essential: true,
+    });
+  }
+});
 
-          // Add or update the marker
-          if (userMarker) {
-            userMarker.setLngLat([lng, lat]);
-          } else {
-            userMarker = new maplibregl.Marker({
-              color: "#007cba",
-            })
-              .setLngLat([lng, lat])
-              .addTo(map);
-          }
-
-          map.flyTo({
-            center: [lng, lat],
-            zoom: 15,
-            essential: true,
-          });
-        } else {
-          // Fallback: try to get location again
-          locateBtn.textContent = "📍 Getting Location...";
-          locateBtn.disabled = true;
-          getUserLocation();
-        }
-      });
-
-      // Get location on page load
-      getUserLocation();
+// Start tracking immediately
+startTrackingLocation();
